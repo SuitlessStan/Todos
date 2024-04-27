@@ -43,7 +43,7 @@ export default function Authenticated({
                                         <span className="inline-flex rounded-md">
                                             <button
                                                 type="button"
-                                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150"
+                                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md focus:outline-none transition ease-in-out duration-150"
                                             >
                                                 {user.name}
 
@@ -88,7 +88,7 @@ export default function Authenticated({
                                         (previousState) => !previousState
                                     )
                                 }
-                                className="inline-flex items-center justify-center p-2 md:border-none rounded-md focus:outline-none transition duration-150 ease-in-out"
+                                className="inline-flex items-center justify-center p-2 border-blacklike border-2 border-solid rounded-md focus:outline-none transition duration-150 ease-in-out"
                             >
                                 <svg
                                     className="h-6 w-6"
@@ -151,10 +151,7 @@ export default function Authenticated({
                         </div>
 
                         <div className="mt-3 space-y-1">
-                            <ResponsiveNavLink
-                                className="hover:bg-sky-300"
-                                href={route("profile.edit")}
-                            >
+                            <ResponsiveNavLink href={route("profile.edit")}>
                                 Profile
                             </ResponsiveNavLink>
                             <ResponsiveNavLink
@@ -170,7 +167,7 @@ export default function Authenticated({
             </nav>
 
             {header && (
-                <header className="bg-white shadow">
+                <header className="bg-darkseagreen shadow">
                     <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                         {header}
                     </div>

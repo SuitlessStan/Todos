@@ -17,7 +17,12 @@ export default {
             },
             colors: {
                 mediumaquamarine: "#60c0bf",
+                darkseagreen: "#7fbc95",
                 blacklike: "#1a1c1e",
+                sandybrown: "#f7cb66",
+                mediumpurple: "#b380da",
+                salmon: "#ed7461",
+                indianred: "#e06b6b",
             },
         },
     },
