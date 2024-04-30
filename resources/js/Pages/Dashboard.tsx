@@ -11,6 +11,8 @@ import {
 import { Todo } from "@/types";
 import Modal from "@/Components/Modal";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { error } from "console";
+import { fetchDataFromLocalStorage, stringifyAndStore } from "@/Util";
 
 let tasks: Todo[] = [
     { id: 1, text: "Go to the shop", isDone: false },
@@ -26,19 +28,40 @@ let tasks: Todo[] = [
 export default function Dashboard({ auth }: PageProps) {
     const [modalState, setModalState] = useState(false);
 
-    const [todos, setTodos] = useState<Todo[]>(tasks);
+    const [todos, setTodos] = useState<Todo[]>([]);
     const [errors, setError] = useState("");
+
+    const [input, setInput] = useState("");
+    const [isValid, setIsValid] = useState(true);
 
     const [searchQuery, setSearchQuery] = useState("");
 
     const handleSearchQuery = (e: ChangeEvent<HTMLInputElement>) =>
         setSearchQuery(event?.target?.value);
 
-    const closeModal = () => setModalState(false);
+    const filteredTodos = todos.filter((todo) =>
+        todo.text.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+        setInput(event.target.value);
+
+        setIsValid(input.trim().split(" ").length > 0);
+    };
+
+    const closeModal = () => {
+        setModalState(false);
+        setInput("");
+    };
     const openModal = () => setModalState(true);
 
     const onSubmit = (e: Event | FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        if (input.length === 0) {
+            setError("Add a todo before submitting");
+            return;
+        }
 
         const task = (e.target as HTMLFormElement).elements.todo.value;
 
@@ -94,9 +117,18 @@ export default function Dashboard({ auth }: PageProps) {
         setTodos(updatedTodos);
     };
 
-    const filteredTodos = todos.filter((todo) =>
-        todo.text.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    useEffect(() => {
+        const todos = fetchDataFromLocalStorage("todos");
+
+        if (!todos) {
+            return;
+        }
+        setTodos(todos);
+    }, []);
+
+    useEffect(() => {
+        stringifyAndStore("todos", todos);
+    }, [todos]);
 
     return (
         <AuthenticatedLayout
@@ -160,13 +192,20 @@ export default function Dashboard({ auth }: PageProps) {
                             <div className="flex-grow border-t border-gray-400"></div>
                         </div>
                         <input
-                            className="px-2 py-2 text-xl my-2 mb-4 "
+                            className={`px-2 py-2 text-xl my-2 mb-4 ${
+                                isValid || errors.length > 0
+                                    ? "border-black"
+                                    : "border-red-500"
+                            }`}
                             type="text"
                             name="todo"
                             id="todo"
                             placeholder="add a new todo !"
+                            value={input}
+                            onChange={handleChange}
                         />
-                        <div className="flex justify-between">
+                        {!isValid && errors}
+                        <div className="flex justify-between mt-2">
                             <input
                                 type="submit"
                                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer"
@@ -184,7 +223,7 @@ export default function Dashboard({ auth }: PageProps) {
             </Modal>
 
             <div
-                className="py-12 flex flex-col justify-center md:items-center h-full"
+                className="py-12 flex flex-col md:items-center h-screen"
                 id="todo-container"
             >
                 {filteredTodos.map((todo: Todo) => (
