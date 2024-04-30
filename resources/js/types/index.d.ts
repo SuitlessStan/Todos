@@ -8,6 +8,7 @@ export interface User {
 export interface Todo {
     id: number;
     text: string;
+    isDone: boolean;
 }
 
 export type PageProps<
