@@ -11,19 +11,7 @@ import {
 import { Todo } from "@/types";
 import Modal from "@/Components/Modal";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import { error } from "console";
 import { fetchDataFromLocalStorage, stringifyAndStore } from "@/Util";
-
-let tasks: Todo[] = [
-    { id: 1, text: "Go to the shop", isDone: false },
-    { id: 2, text: "Read a book", isDone: false },
-    { id: 3, text: "Learn React", isDone: false },
-    { id: 4, text: "Read a book", isDone: false },
-    { id: 5, text: "Write a blog post", isDone: false },
-    { id: 6, text: "Exercise for 30 minutes", isDone: false },
-    { id: 7, text: "Call a friend", isDone: false },
-    { id: 8, text: "Finish the assignment", isDone: false },
-];
 
 export default function Dashboard({ auth }: PageProps) {
     const [modalState, setModalState] = useState(false);
@@ -52,6 +40,7 @@ export default function Dashboard({ auth }: PageProps) {
     const closeModal = () => {
         setModalState(false);
         setInput("");
+        setError("");
     };
     const openModal = () => setModalState(true);
 
@@ -71,11 +60,17 @@ export default function Dashboard({ auth }: PageProps) {
             isDone: false,
         });
 
-        closeModal();
+        !errors.length && closeModal();
     };
 
     const addNewTask = (todo: Todo) => {
-        if (todos.some((task) => task.text === todo.text)) {
+        if (
+            todos.some(
+                (task) =>
+                    task.text.toLowerCase().trim() ===
+                    todo.text.toLowerCase().trim()
+            )
+        ) {
             console.log("A todo with the same text already exists.");
             setError("A todo with the same text already exists.");
             return;
@@ -97,7 +92,7 @@ export default function Dashboard({ auth }: PageProps) {
 
         updatedTodos[todoIndex] = {
             ...updatedTodos[todoIndex],
-            isDone: true,
+            isDone: !updatedTodos[todoIndex].isDone,
         };
 
         setTodos(updatedTodos);
@@ -193,9 +188,8 @@ export default function Dashboard({ auth }: PageProps) {
                         </div>
                         <input
                             className={`px-2 py-2 text-xl my-2 mb-4 ${
-                                isValid || errors.length > 0
-                                    ? "border-black"
-                                    : "border-red-500"
+                                (!isValid || errors) &&
+                                "border-red-500 border-4"
                             }`}
                             type="text"
                             name="todo"
@@ -204,7 +198,13 @@ export default function Dashboard({ auth }: PageProps) {
                             value={input}
                             onChange={handleChange}
                         />
-                        {!isValid && errors}
+                        {!isValid && (
+                            <p>
+                                Please enter a valid and understandable
+                                sentence.
+                            </p>
+                        )}
+                        {errors && <p>{errors}</p>}
                         <div className="flex justify-between mt-2">
                             <input
                                 type="submit"
@@ -260,6 +260,9 @@ export default function Dashboard({ auth }: PageProps) {
                         </div>
                     </div>
                 ))}
+                {filteredTodos.length === 0 && searchQuery.length > 0 && (
+                    <p className="text-xl">No results found.</p>
+                )}
             </div>
         </AuthenticatedLayout>
     );
