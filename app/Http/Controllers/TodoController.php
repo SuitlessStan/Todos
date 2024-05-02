@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\todo;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Validator;
 
 class TodoController extends Controller
 {
@@ -19,9 +20,25 @@ class TodoController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(User $user, Todo $todo)
+    public function create(User $user, Request $request)
     {
-        
+
+        $validator = Validator::make($request->all(), [
+            "text" => ["required", "string"],
+            "user_id" => ["required", "integer", "string"],
+            "isDone" => ["required", "integer", "boolean", "string"],
+        ]);
+
+
+        if ($validator->fails()) {
+            return response()->json([
+                "error" => $validator->errors()->first(),
+            ], 400);
+        }
+
+        $todo = Todo::add($validator->getData());
+
+        return response()->json($todo, 201);
     }
 
     /**

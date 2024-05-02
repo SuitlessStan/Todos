@@ -10,24 +10,35 @@ class todo extends Model
     use HasFactory;
 
     protected $table = "todos";
+    protected $fillable = ['id', 'user_id', 'text', 'isDone'];
 
 
-    public function get()
+    public static function get()
     {
         return self::all();
     }
 
-    public function add($data)
+    /**
+     * add a new entry of todos.
+     */
+    public static function add($data)
     {
+
+        $existingTodo = self::where("text", $data["text"])->where("user_id", $data["user_id"])->first();
+
+        if ($existingTodo) {
+            return null;
+        }
+
         return self::create($data);
     }
 
-    public function remove($id)
+    public static function remove($id)
     {
         return self::where("id", $id)->delete();
     }
 
-    public function edit($id, $data)
+    public static function edit($id, $data)
     {
         return self::where("id", $id)->update($data);
     }
