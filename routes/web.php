@@ -20,7 +20,9 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get("/todos/{user}", [TodoController::class, "index"])->middleware(["auth", "verified"])->name("todo.index");
-Route::post("/todos/{user}/", [TodoController::class, "create"])->middleware(["auth", "verified"])->name("todo.create");
+Route::post("/todos/{user}/", [TodoController::class, "store"])->middleware(["auth", "verified"])->name("todo.store");
+Route::patch("/todos/{user}/{id}", [TodoController::class, "edit"])->middleware(["auth", "verified"])->name("todo.edit");
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\todo;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -13,28 +14,89 @@ class TodoModelTest extends TestCase
     use RefreshDatabase;
 
     /**
+     * it can get all todos for user
+     */
+    public function test_it_can_get_all_todo()
+    {
+        $user = User::factory()->create();
+
+        Todo::factory()->count(3)->create(["user_id" => $user->id]);
+
+        $todos = todo::getAll($user);
+
+        $this->assertCount(3, $todos);
+
+        foreach ($todos as $todo) {
+            $this->assertEquals($user->id, $todo->user_id);
+        }
+    }
+
+    /**
      * it can create a new todo entry
      */
     public function test_it_can_create_a_todo()
     {
-
-        // test data
         $todoData = [
             "text" => "watch the football game",
             "user_id" => 2,
             "isDone" => 0
         ];
 
-        // call to model
         $todo = todo::add($todoData);
 
-        // assertions
         $this->assertNotNull($todo->id);
         $this->assertNotNull($todo->user_id);
         $this->assertEquals($todoData['text'], $todo->text);
         $this->assertEquals($todoData['isDone'], $todo->isDone);
 
     }
+
+    /**
+     * it can update to do
+     */
+    public function test_it_can_update_a_todo()
+    {
+
+        $user = User::factory()->create();
+        Todo::factory()->count(1)->create(['user_id' => $user->id]);
+
+        $todo = todo::getAll($user)->first();
+
+        $text = [
+            "text" => "play the piano"
+        ];
+        Todo::edit($todo->id, $text);
+
+        $status = [
+            "isDone" => !$todo->isDone,
+        ];
+        Todo::edit($todo->id, $status);
+
+
+        $updatedTodo = Todo::findOrFail($todo->id);
+
+        $this->assertEquals($updatedTodo->text, $text['text']);
+        $this->assertEquals(!$todo->isDone, $updatedTodo->isDone);
+    }
+
+
+    /**
+     * it can remove a todo entry
+     */
+    public function test_it_can_remove_a_todo()
+    {
+
+        $todo = Todo::factory()->create();
+        $todo = $todo->first();
+
+
+        todo::remove($todo->id);
+
+        $updatedTodo = Todo::findOrFail($todo->id);
+
+        $this->assertNotNull($updatedTodo->inActiveAt);
+    }
+
 }
 
 

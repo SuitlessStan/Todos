@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->timestamps();
             $table->text("text");
             $table->boolean("isDone")->default(false);
+            $table->timestamp("inActiveAt")->nullable()->default(null);
         });
     }
 

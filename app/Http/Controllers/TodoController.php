@@ -14,7 +14,7 @@ class TodoController extends Controller
      */
     public function index(User $user)
     {
-        return Todo::where("user_id", $user->id)->get()->toJson();
+        return Todo::get($user);
     }
 
     /**
@@ -44,9 +44,25 @@ class TodoController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, User $user)
     {
-        //
+
+        $validator = Validator::make($request->all(), [
+            "text" => ["required", "string"],
+            "user_id" => ["required", "integer", "string"],
+            "isDone" => ["required", "integer", "boolean", "string"],
+        ]);
+
+
+        if ($validator->fails()) {
+            return response()->json([
+                "error" => $validator->errors()->first(),
+            ], 400);
+        }
+
+        $todo = Todo::add($validator->getData());
+
+        return response()->json($todo, 201);
     }
 
     /**
@@ -54,23 +70,75 @@ class TodoController extends Controller
      */
     public function show(todo $todo)
     {
-        //
+
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(todo $todo)
+    public function edit(Request $request, $user, $id)
     {
-        //
+        $todo = Todo::findOrFail($id);
+        if ($user->id != $todo->user_id) {
+            return response()->json([
+                "error" => $todo->errors()->first(),
+            ]);
+        }
+        $validator = Validator::make($request->all(), [
+            "text" => ["required", "string"],
+            "user_id" => ["required", "integer", "string"],
+            "isDone" => ["required", "integer", "boolean", "string"],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "error" => $validator->errors()->first(),
+            ], 400);
+        }
+
+        $requestData = [];
+        $keys = ["text", "isDone"];
+        foreach ($keys as $key) {
+            if ($request->has($key)) {
+                $requestData[$key] = $request->input($key);
+            }
+        }
+
+        return Todo::edit($id, $requestData);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, todo $todo)
+    public function update(Request $request, $user, $id)
     {
-        //
+        $todo = Todo::findOrFail($id);
+        if ($user->id != $todo->user_id) {
+            return response()->json([
+                "error" => $todo->errors()->first(),
+            ]);
+        }
+        $validator = Validator::make($request->all(), [
+            "text" => ["required", "string"],
+            "user_id" => ["required", "integer", "string"],
+            "isDone" => ["required", "integer", "boolean", "string"],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "error" => $validator->errors()->first(),
+            ], 400);
+        }
+
+        $requestData = [];
+        $keys = ["text", "isDone"];
+        foreach ($keys as $key) {
+            if ($request->has($key)) {
+                $requestData[$key] = $request->input($key);
+            }
+        }
+
+        return Todo::edit($id, $requestData);
     }
 
     /**

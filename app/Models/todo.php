@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
+
 
 class todo extends Model
 {
@@ -13,9 +15,9 @@ class todo extends Model
     protected $fillable = ['id', 'user_id', 'text', 'isDone'];
 
 
-    public static function get()
+    public static function getAll(User $user)
     {
-        return self::all();
+        return self::where("user_id", $user->id)->get();
     }
 
     /**
@@ -35,7 +37,7 @@ class todo extends Model
 
     public static function remove($id)
     {
-        return self::where("id", $id)->delete();
+        return self::where("id", $id)->update(["inActiveAt" => Carbon::now()->toDateTimeString()]);
     }
 
     public static function edit($id, $data)
@@ -43,11 +45,11 @@ class todo extends Model
         return self::where("id", $id)->update($data);
     }
 
-
     public function user()
     {
         return $this->belongsTo(User::class);
     }
+
 
 
 }
