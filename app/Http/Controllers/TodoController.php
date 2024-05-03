@@ -12,9 +12,19 @@ class TodoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(User $user)
+    public function index(Request $request, User $user)
     {
-        return Todo::get($user);
+        $validator = Validator::make($request->all(), [
+            "id" => ["required", "string", "integer"],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "error" => $validator->errors()->first(),
+            ], 400);
+        }
+
+        return response()->json(Todo::get($user), 200);
     }
 
     /**
@@ -23,22 +33,7 @@ class TodoController extends Controller
     public function create(User $user, Request $request)
     {
 
-        $validator = Validator::make($request->all(), [
-            "text" => ["required", "string"],
-            "user_id" => ["required", "integer", "string"],
-            "isDone" => ["required", "integer", "boolean", "string"],
-        ]);
 
-
-        if ($validator->fails()) {
-            return response()->json([
-                "error" => $validator->errors()->first(),
-            ], 400);
-        }
-
-        $todo = Todo::add($validator->getData());
-
-        return response()->json($todo, 201);
     }
 
     /**
@@ -60,9 +55,7 @@ class TodoController extends Controller
             ], 400);
         }
 
-        $todo = Todo::add($validator->getData());
-
-        return response()->json($todo, 201);
+        return response()->json(Todo::add($validator->getData()), 201);
     }
 
     /**
@@ -104,7 +97,7 @@ class TodoController extends Controller
             }
         }
 
-        return Todo::edit($id, $requestData);
+        return response()->json(Todo::edit($id, $requestData), 200);
     }
 
     /**
@@ -138,14 +131,33 @@ class TodoController extends Controller
             }
         }
 
-        return Todo::edit($id, $requestData);
+        return response()->json(Todo::edit($id, $requestData), 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(todo $todo)
+    public function destroy(User $user, Request $request, $id)
     {
-        //
+        $todo = Todo::findOrFail($id);
+
+        if ($user->id != $todo->user_id) {
+            return response()->json([
+                "error" => $todo->errors()->first(),
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            "id" => ["required", "string", "integer"],
+            "user_id" => ["required", "string", "integer"]
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "error" => $validator->errors()->first(),
+            ], 400);
+        }
+
+        return response()->json(Todo::destroy($id), 200);
     }
 }
