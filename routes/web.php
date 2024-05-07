@@ -21,8 +21,8 @@ Route::get('/dashboard', function () {
 
 Route::get("/todos/{user}", [TodoController::class, "index"])->middleware(["auth", "verified"])->name("todo.index");
 Route::post("/todos/{user}", [TodoController::class, "store"])->middleware(["auth", "verified"])->name("todo.store");
-Route::patch("/todos/{user}/{id}", [TodoController::class, "edit"])->middleware(["auth", "verified"])->name("todo.edit");
-Route::delete("/todos/{user}/{id}", [TodoController::class, "destroy"])->middleware(["auth", "verified"])->name("todo.destroy");
+Route::put("/todos/{user}/{todo}", [TodoController::class, "update"])->middleware(["auth", "verified"])->name("todo.update");
+Route::delete("/todos/{user}/{todo}", [TodoController::class, "destroy"])->middleware(["auth", "verified"])->name("todo.destroy");
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

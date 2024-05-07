@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\todo;
+use App\Models\Todo;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -21,7 +21,7 @@ class TodoModelTest extends TestCase
 
         Todo::factory()->count(3)->create(["user_id" => $user->id]);
 
-        $todos = todo::getAll($user);
+        $todos = Todo::getAll($user);
 
         $this->assertCount(3, $todos);
 
@@ -41,7 +41,7 @@ class TodoModelTest extends TestCase
             "isDone" => 0
         ];
 
-        $todo = todo::add($todoData);
+        $todo = Todo::add($todoData);
 
         $this->assertNotNull($todo->id);
         $this->assertNotNull($todo->user_id);
@@ -59,7 +59,7 @@ class TodoModelTest extends TestCase
         $user = User::factory()->create();
         Todo::factory()->count(1)->create(['user_id' => $user->id]);
 
-        $todo = todo::getAll($user)->first();
+        $todo = Todo::getAll($user)->first();
 
         $text = [
             "text" => "play the piano"
@@ -89,7 +89,7 @@ class TodoModelTest extends TestCase
         $todo = $todo->first();
 
 
-        todo::remove($todo->id);
+        Todo::remove($todo->id);
 
         $updatedTodo = Todo::findOrFail($todo->id);
 

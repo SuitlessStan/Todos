@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 
-class todo extends Model
+class Todo extends Model
 {
     use HasFactory;
 
@@ -17,7 +17,7 @@ class todo extends Model
 
     public static function getAll(User $user)
     {
-        return self::where("user_id", $user->id)->get();
+        return self::where("user_id", $user->id)->whereNull("inActiveAt")->get();
     }
 
     /**
@@ -35,14 +35,14 @@ class todo extends Model
         return self::create($data);
     }
 
-    public static function remove($id)
+    public static function remove($id, $user)
     {
-        return self::where("id", $id)->update(["inActiveAt" => Carbon::now()->toDateTimeString()]);
+        return self::where(["id" => $id, "user_id" => $user->id])->update(["inActiveAt" => Carbon::now()->toDateTimeString()]);
     }
 
-    public static function edit($id, $data)
+    public static function edit($id, $user, $data)
     {
-        return self::where("id", $id)->update($data);
+        return self::where(["id" => $id, "user_id" => $user->id])->update($data);
     }
 
     public function user()
