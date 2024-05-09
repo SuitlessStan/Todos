@@ -83,10 +83,9 @@ class TodoController extends Controller
      */
     public function update(Request $request, User $user, Todo $todo)
     {
-
         $validator = Validator::make($request->all(), [
-            "text" => ["required", "string"],
-            "isDone" => ["required", "boolean"],
+            "text" => ["required_without:isDone", "string"],
+            "isDone" => ["required_without:text", "boolean"],
         ]);
 
         if ($validator->fails()) {

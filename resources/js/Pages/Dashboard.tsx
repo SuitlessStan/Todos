@@ -114,19 +114,11 @@ export default function Dashboard({ auth }: PageProps) {
             isDone: !updatedTodos[todoIndex].isDone,
         };
 
-        let todoUpdate;
-
-        todoUpdate = Object.assign({}, todoUpdate, {
-            text: todos[todoIndex].text,
-            isDone: todos[todoIndex].isDone as number,
-        });
-
-        await axios.put(
-            `/todos/${auth.user.id}/${todos[todoIndex].id}`,
-            todoUpdate
-        );
-
         setTodos(updatedTodos);
+
+        await axios.put(`/todos/${auth.user.id}/${todos[todoIndex].id}`, {
+            isDone: updatedTodos[todoIndex].isDone,
+        });
     };
 
     const markAsDeleted = async (id: number) => {
