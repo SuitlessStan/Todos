@@ -1,7 +1,7 @@
 import { Todo } from "@/types";
 
 export const stringifyAndStore = (key: string, data: Todo[]) => {
-    if (localStorage.getItem(key)) {
+    if (localStorage.getItem(key) || data.length > 0) {
         const jsonData = JSON.stringify(data);
         localStorage.setItem(key, jsonData);
     }

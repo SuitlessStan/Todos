@@ -12,6 +12,7 @@ import { Todo } from "@/types";
 import Modal from "@/Components/Modal";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { fetchDataFromLocalStorage, stringifyAndStore } from "@/Util";
+import axios from "axios";
 
 export default function Dashboard({ auth }: PageProps) {
     const [modalState, setModalState] = useState(false);
@@ -44,7 +45,7 @@ export default function Dashboard({ auth }: PageProps) {
     };
     const openModal = () => setModalState(true);
 
-    const onSubmit = (e: Event | FormEvent<HTMLFormElement>) => {
+    const onSubmit = async (e: Event | FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         if (input.length === 0) {
@@ -54,16 +55,18 @@ export default function Dashboard({ auth }: PageProps) {
 
         const task = (e.target as HTMLFormElement).elements.todo.value;
 
-        addNewTask({
-            id: Date.now(),
+        await addNewTask({
             text: task,
             isDone: false,
+            user_id: auth.user.id,
         });
 
-        !errors.length && closeModal();
+        if (!errors.length) {
+            closeModal();
+        }
     };
 
-    const addNewTask = (todo: Todo) => {
+    const addNewTask = async (todo: Todo) => {
         if (
             todos.some(
                 (task) =>
@@ -76,10 +79,26 @@ export default function Dashboard({ auth }: PageProps) {
             return;
         }
 
-        setTodos((prevState) => [...prevState, todo]);
+        const response = await axios.post(`/todos/${auth.user.id}`, {
+            text: todo.text,
+            isDone: todo.isDone,
+            user_id: auth.user.id,
+        });
+
+        const { id } = response.data;
+
+        setTodos((prevState) => [
+            ...prevState,
+            {
+                id: id,
+                text: todo.text,
+                isDone: todo.isDone,
+                user_id: auth.user.id,
+            },
+        ]);
     };
 
-    const markAsFinished = (id: number) => {
+    const markAsFinished = async (id: number) => {
         const todoIndex = todos.findIndex((todo) => todo.id === id);
 
         if (todoIndex === -1) {
@@ -95,10 +114,22 @@ export default function Dashboard({ auth }: PageProps) {
             isDone: !updatedTodos[todoIndex].isDone,
         };
 
+        let todoUpdate;
+
+        todoUpdate = Object.assign({}, todoUpdate, {
+            text: todos[todoIndex].text,
+            isDone: todos[todoIndex].isDone as number,
+        });
+
+        await axios.put(
+            `/todos/${auth.user.id}/${todos[todoIndex].id}`,
+            todoUpdate
+        );
+
         setTodos(updatedTodos);
     };
 
-    const markAsDeleted = (id: number) => {
+    const markAsDeleted = async (id: number) => {
         const todoIndex = todos.findIndex((todo) => todo.id === id);
 
         if (todoIndex === -1) {
@@ -109,21 +140,28 @@ export default function Dashboard({ auth }: PageProps) {
 
         const updatedTodos = todos.filter((todo) => todo.id !== id);
 
+        await axios.delete(`/todos/${auth.user.id}/${todos[todoIndex].id}`);
+
         setTodos(updatedTodos);
     };
 
-    useEffect(() => {
-        const todos = fetchDataFromLocalStorage("todos");
+    const getTodos = async () => await axios.get(`todos/${auth.user.id}`);
 
-        if (!todos) {
-            return;
-        }
-        setTodos(todos);
+    // useEffect(() => {
+    //     const todos = fetchDataFromLocalStorage("todos");
+
+    //     if (!todos) {
+    //         return;
+    //     }
+    //     setTodos(todos);
+    // }, []);
+
+    useEffect(() => {
+        getTodos()
+            .then((res) => setTodos(res.data))
+            .catch((err) => console.error(err));
+        // stringifyAndStore("todos", todos);
     }, []);
-
-    useEffect(() => {
-        stringifyAndStore("todos", todos);
-    }, [todos]);
 
     return (
         <AuthenticatedLayout
@@ -226,7 +264,7 @@ export default function Dashboard({ auth }: PageProps) {
                 className="py-12 flex flex-col md:items-center h-screen"
                 id="todo-container"
             >
-                {filteredTodos.map((todo: Todo) => (
+                {todos.map((todo: Todo) => (
                     <div
                         key={todo.id}
                         className={`md:w-3/4 pt-2 pb-1 px-4 mt-3 ml-1 rounded text-lg bg-mediumpurple flex justify-between items-center ${
@@ -241,7 +279,7 @@ export default function Dashboard({ auth }: PageProps) {
                         <div className="flex justify-center items-center gap-2">
                             <button
                                 type="button"
-                                onClick={() => markAsDeleted(todo.id)}
+                                onClick={() => markAsDeleted(todo.id as number)}
                             >
                                 <FontAwesomeIcon
                                     icon={faTrash}
@@ -249,7 +287,9 @@ export default function Dashboard({ auth }: PageProps) {
                                 />
                             </button>
                             <button
-                                onClick={() => markAsFinished(todo.id)}
+                                onClick={() =>
+                                    markAsFinished(todo.id as number)
+                                }
                                 type="button"
                             >
                                 <FontAwesomeIcon

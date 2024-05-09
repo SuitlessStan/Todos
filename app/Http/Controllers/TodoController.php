@@ -86,7 +86,7 @@ class TodoController extends Controller
 
         $validator = Validator::make($request->all(), [
             "text" => ["required", "string"],
-            "isDone" => ["required", "integer", "boolean"],
+            "isDone" => ["required", "boolean"],
         ]);
 
         if ($validator->fails()) {
