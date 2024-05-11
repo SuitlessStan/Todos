@@ -66,7 +66,24 @@ export default function Dashboard({ auth }: PageProps) {
         .slice(indexOfFirstTodo, indexOfLastTodo)
         .filter((todo) =>
             todo.text.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+        )
+        .sort((a, b) => {
+            if (a.created_at && b.created_at) {
+                if (a.created_at < b.created_at) {
+                    return 1; // If a is older, move it down
+                } else if (a.created_at > b.created_at) {
+                    return -1; // If a is newer, move it up
+                }
+            }
+            if (a.updated_at && b.updated_at) {
+                if (a.updated_at < b.updated_at) {
+                    return 1; // If a is older, move it down
+                } else if (a.updated_at > b.updated_at) {
+                    return -1; // If a is newer, move it up
+                }
+            }
+            return 0;
+        });
 
     // Change page
     const paginateFront = () => setCurrentPage(currentPage + 1);

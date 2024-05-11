@@ -10,6 +10,8 @@ export interface Todo {
     text: string;
     isDone: boolean | number;
     user_id: number | string;
+    created_at?: Date;
+    updated_at?: Date;
 }
 
 export interface PaginationProps {

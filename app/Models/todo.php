@@ -21,7 +21,12 @@ class Todo extends Model
 
     public static function getAll(User $user, $perPage = 10)
     {
-        return self::where("user_id", $user->id)->whereNull("inActiveAt")->paginate($perPage)->all();
+        return self::where("user_id", $user->id)
+            ->whereNull("inActiveAt")
+            ->orderBy('created_at', 'desc')
+            ->orderBy('updated_at', 'desc')
+            ->paginate($perPage)
+            ->all();
     }
 
     public static function getDeleted(User $user, $perPage = 10)
