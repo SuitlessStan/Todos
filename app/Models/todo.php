@@ -5,24 +5,31 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 
 class Todo extends Model
 {
     use HasFactory;
+    use SoftDeletes;
 
     protected $table = "todos";
     protected $fillable = ['id', 'user_id', 'text', 'isDone'];
+    const DELETED_AT = "inActiveAt";
 
 
-    public static function getAll(User $user)
+
+    public static function getAll(User $user, $perPage = 10)
     {
-        return self::where("user_id", $user->id)->whereNull("inActiveAt")->get();
+        return self::where("user_id", $user->id)->whereNull("inActiveAt")->paginate($perPage)->all();
     }
 
-    /**
-     * add a new entry of todos.
-     */
+    public static function getDeleted(User $user, $perPage = 10)
+    {
+        return self::where("user_id", $user->id)->onlyTrashed()->paginate($perPage)->all();
+    }
+
+
     public static function add($data)
     {
 

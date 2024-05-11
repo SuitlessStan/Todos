@@ -12,9 +12,17 @@ class TodoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(User $user)
+    public function index(User $user, $perPage = 30)
     {
-        return response()->json(Todo::getAll($user), 200);
+        return response()->json(Todo::getAll($user, $perPage), 200);
+    }
+
+    /**
+     * get list of deleted todos
+     */
+    public function getDeleted(User $user, $perPage = 10)
+    {
+        return response()->json(Todo::getDeleted($user, $perPage), 200);
     }
 
     /**

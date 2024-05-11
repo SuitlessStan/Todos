@@ -7,6 +7,7 @@ use App\Models\Todo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
+use Illuminate\Support\Carbon;
 
 
 class TodoControllerTest extends TestCase
@@ -63,6 +64,18 @@ class TodoControllerTest extends TestCase
         $response = $this->actingAs($user)->get(route("todo.index", ["user" => $user]));
 
         $response->assertStatus(200);
+        $response->assertJsonCount(10);
+    }
+
+    public function test_authenticated_user_can_get_deleted_todos()
+    {
+        $user = User::factory()->create();
+        Todo::factory(10)->create(["user_id" => $user->id, "inActiveAt" => Carbon::now()->toDateTimeString()]);
+
+        $response = $this->actingAs($user)->get(route('todo.getDeleted', ['user' => $user]));
+
+        $response->assertStatus(200);
+
     }
 }
 

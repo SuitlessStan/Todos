@@ -7,19 +7,40 @@ import {
     faTrash,
     faCheck,
     faClipboard,
+    faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { Todo } from "@/types";
 import Modal from "@/Components/Modal";
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import {
+    ChangeEvent,
+    FormEvent,
+    useEffect,
+    useState,
+    CSSProperties,
+} from "react";
 import { fetchDataFromLocalStorage, stringifyAndStore } from "@/Util";
+import useKeyPress from "@/hooks/useKeyPress";
 import axios from "axios";
+
+import { ClipLoader } from "react-spinners";
+import Pagination from "@/Components/Pagination";
+import Todos from "@/Components/Todos";
+
+const override: CSSProperties = {
+    display: "block",
+    margin: "0 auto",
+    borderColor: "#7fbc95",
+    borderWidth: "5px",
+};
 
 export default function Dashboard({ auth }: PageProps) {
     const [modalState, setModalState] = useState(false);
+    const [deletedModalState, setDeletedModalState] = useState(false);
 
     const [todos, setTodos] = useState<Todo[]>([]);
-    const [errors, setError] = useState("");
+    const [deletedTodos, setDeletedTodos] = useState<Todo[]>([]);
 
+    const [errors, setError] = useState("");
     const [input, setInput] = useState("");
     const [isValid, setIsValid] = useState(true);
 
@@ -31,6 +52,25 @@ export default function Dashboard({ auth }: PageProps) {
     const filteredTodos = todos.filter((todo) =>
         todo.text.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    let [loading, setLoading] = useState(true);
+    let [color, setColor] = useState("#ed7461");
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [todosPerPage] = useState(10);
+
+    // Get current todos
+    const indexOfLastTodo = currentPage * todosPerPage;
+    const indexOfFirstTodo = indexOfLastTodo - todosPerPage;
+    const currentTodos = todos
+        .slice(indexOfFirstTodo, indexOfLastTodo)
+        .filter((todo) =>
+            todo.text.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
+    // Change page
+    const paginateFront = () => setCurrentPage(currentPage + 1);
+    const paginateBack = () => setCurrentPage(currentPage - 1);
 
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         setInput(event.target.value);
@@ -132,6 +172,7 @@ export default function Dashboard({ auth }: PageProps) {
 
         const updatedTodos = todos.filter((todo) => todo.id !== id);
 
+        setDeletedTodos([...deletedTodos, todos[todoIndex]]);
         await axios.delete(`/todos/${auth.user.id}/${todos[todoIndex].id}`);
 
         setTodos(updatedTodos);
@@ -139,21 +180,38 @@ export default function Dashboard({ auth }: PageProps) {
 
     const getTodos = async () => await axios.get(`todos/${auth.user.id}`);
 
-    // useEffect(() => {
-    //     const todos = fetchDataFromLocalStorage("todos");
+    const getDeletedTodos = async () =>
+        await axios.get(`todos/${auth.user.id}/deleted`);
 
-    //     if (!todos) {
-    //         return;
-    //     }
-    //     setTodos(todos);
-    // }, []);
+    useKeyPress("Enter", () => {
+        if (modalState) {
+            onSubmit(new Event("submit"));
+        }
+    });
 
     useEffect(() => {
+        setLoading(true);
         getTodos()
-            .then((res) => setTodos(res.data))
+            .then((res) => {
+                setTodos(res.data);
+                setLoading(false);
+            })
+            .catch((err) => {
+                const todos = fetchDataFromLocalStorage("todos");
+
+                if (!todos) {
+                    console.error(err);
+                    return;
+                }
+                console.error(err);
+                setTodos(todos);
+            });
+        getDeletedTodos()
+            .then((res) => setDeletedTodos(res.data))
             .catch((err) => console.error(err));
-        // stringifyAndStore("todos", todos);
     }, []);
+
+    useEffect(() => stringifyAndStore("todos", todos), [todos]);
 
     return (
         <AuthenticatedLayout
@@ -251,51 +309,63 @@ export default function Dashboard({ auth }: PageProps) {
                     </div>
                 </form>
             </Modal>
-
             <div
-                className="py-12 flex flex-col md:items-center h-screen"
+                className="py-12 flex flex-col md:items-center h-screen items-center"
                 id="todo-container"
             >
-                {todos.map((todo: Todo) => (
-                    <div
-                        key={todo.id}
-                        className={`md:w-3/4 pt-2 pb-1 px-4 mt-3 ml-1 rounded text-lg bg-mediumpurple flex justify-between items-center ${
-                            todo.text ? "" : "hidden"
-                        }`}
-                    >
-                        <span
-                            className={`${todo.isDone ? "line-through" : ""}`}
-                        >
-                            {todo.text}
-                        </span>
-                        <div className="flex justify-center items-center gap-2">
-                            <button
-                                type="button"
-                                onClick={() => markAsDeleted(todo.id as number)}
-                            >
-                                <FontAwesomeIcon
-                                    icon={faTrash}
-                                    className="p-2 rounded border-transparent border-2 w-4 h-4 bg-indianred"
-                                />
-                            </button>
-                            <button
-                                onClick={() =>
-                                    markAsFinished(todo.id as number)
-                                }
-                                type="button"
-                            >
-                                <FontAwesomeIcon
-                                    icon={faCheck}
-                                    className="p-2 rounded border-transparent border-2 w-4 h-4 bg-darkseagreen"
-                                />
-                            </button>
-                        </div>
-                    </div>
-                ))}
-                {filteredTodos.length === 0 && searchQuery.length > 0 && (
-                    <p className="text-xl">No results found.</p>
-                )}
+                <Todos
+                    loading={loading}
+                    todos={currentTodos}
+                    markAsDeleted={markAsDeleted}
+                    markAsFinished={markAsFinished}
+                    searchQuery={searchQuery}
+                />
+                <Pagination
+                    todosPerPage={todosPerPage}
+                    totalTodos={todos.length}
+                    paginateBack={paginateBack}
+                    paginateFront={paginateFront}
+                    currentPage={currentPage}
+                    className="absolute bottom-8 flex items-center justify-center flex-col gap-1"
+                />
             </div>
+
+            <button
+                onClick={() => setDeletedModalState(true)}
+                type="button"
+                className="fixed bottom-4 right-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50"
+            >
+                <FontAwesomeIcon icon={faTrash} />
+            </button>
+
+            <Modal
+                show={deletedModalState}
+                closeable
+                onClose={() => setDeletedModalState(false)}
+            >
+                <div className="flex flex-col justify-center items-center gap-3 p-3 relative">
+                    <FontAwesomeIcon
+                        className="absolute left-0 top-0 p-3 m-1 rounded bg-darkseagreen cursor-pointer"
+                        icon={faXmark}
+                        onClick={() => setDeletedModalState(false)}
+                    />
+                    <span className="bg-darkseagreen p-3 rounded text-2xl">
+                        Deleted Todos
+                    </span>
+                    {deletedTodos.map((todo) => {
+                        return (
+                            <div
+                                key={todo.id}
+                                className={`pt-2 pb-1 px-4 rounded text-lg bg-mediumpurple flex justify-between items-center`}
+                            >
+                                <span>{todo.text}</span>
+                            </div>
+                        );
+                    })}
+
+                    {!deletedTodos.length && <span>No deleted todos.</span>}
+                </div>
+            </Modal>
         </AuthenticatedLayout>
     );
 }

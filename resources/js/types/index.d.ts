@@ -12,6 +12,23 @@ export interface Todo {
     user_id: number | string;
 }
 
+export interface PaginationProps {
+    todosPerPage: number;
+    totalTodos: number;
+    paginateFront: () => void;
+    paginateBack: () => void;
+    currentPage: number;
+    className: string;
+}
+
+export interface TodosProps {
+    todos: Todo[];
+    loading: boolean;
+    markAsDeleted: (id: number) => Promise<void>;
+    markAsFinished: (id: number) => Promise<void>;
+    searchQuery: string;
+}
+
 export type PageProps<
     T extends Record<string, unknown> = Record<string, unknown>
 > = T & {

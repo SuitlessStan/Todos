@@ -6,6 +6,7 @@ use App\Models\Todo;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Illuminate\Support\Carbon;
 
 
 class TodoModelTest extends TestCase
@@ -28,6 +29,18 @@ class TodoModelTest extends TestCase
         foreach ($todos as $todo) {
             $this->assertEquals($user->id, $todo->user_id);
         }
+    }
+
+    public function test_it_can_get_all_deleted_todos()
+    {
+        $user = User::factory()->create();
+
+        Todo::factory()->count(3)->create(["user_id" => $user->id, "inActiveAt" => Carbon::now()->toDateTimeString()]);
+
+        $todos = Todo::getDeleted($user);
+
+        $this->assertCount(3, $todos);
+
     }
 
     /**
