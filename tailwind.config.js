@@ -14,6 +14,7 @@ export default {
         extend: {
             fontFamily: {
                 sans: ["Figtree", ...defaultTheme.fontFamily.sans],
+                kiddosy: ["kiddosy"],
             },
             colors: {
                 mediumaquamarine: "#60c0bf",
@@ -23,6 +24,8 @@ export default {
                 mediumpurple: "#b380da",
                 salmon: "#ed7461",
                 indianred: "#e06b6b",
+                darkslategray: "#424242",
+                black: "#1e1c1c"
             },
         },
     },

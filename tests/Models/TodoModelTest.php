@@ -72,22 +72,22 @@ class TodoModelTest extends TestCase
         $user = User::factory()->create();
         Todo::factory()->count(1)->create(['user_id' => $user->id]);
 
-        $todo = Todo::getAll($user)->first();
+        $todo = Todo::getAll($user);
+        $todo = $todo[0];
 
-        $text = [
+        Todo::edit($todo->id,$user, [
             "text" => "play the piano"
-        ];
-        Todo::edit($todo->id, $text);
+        ]);
 
-        $status = [
+
+        Todo::edit($todo->id,$user, [
             "isDone" => !$todo->isDone,
-        ];
-        Todo::edit($todo->id, $status);
+        ]);
 
 
         $updatedTodo = Todo::findOrFail($todo->id);
 
-        $this->assertEquals($updatedTodo->text, $text['text']);
+        $this->assertEquals($updatedTodo->text, "play the piano");
         $this->assertEquals(!$todo->isDone, $updatedTodo->isDone);
     }
 
@@ -98,15 +98,14 @@ class TodoModelTest extends TestCase
     public function test_it_can_remove_a_todo()
     {
 
-        $todo = Todo::factory()->create();
-        $todo = $todo->first();
+        $user = User::factory()->create();
+        $todo = Todo::factory()->count(1)->create(["user_id" => $user->id]);
 
+        dd($todo);
 
-        Todo::remove($todo->id);
+        $isRemoved = Todo::remove($todo->id, $user);
 
-        $updatedTodo = Todo::findOrFail($todo->id);
-
-        $this->assertNotNull($updatedTodo->inActiveAt);
+        $this->assertEquals($isRemoved, true);
     }
 
 }

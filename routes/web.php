@@ -19,13 +19,6 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-// Route::get("/todos/{user}/{perPage?}", [TodoController::class, "index"])->middleware(["auth", "verified"])->name("todo.index");
-// Route::get("/todos/{user}/deleted/{perPage?}", [TodoController::class, "getDeleted"])->middleware(["auth", "verified"])->name("todo.getDeleted");
-
-// Route::post("/todos/{user}", [TodoController::class, "store"])->middleware(["auth", "verified"])->name("todo.store");
-// Route::put("/todos/{user}/{todo}", [TodoController::class, "update"])->middleware(["auth", "verified"])->name("todo.update");
-// Route::delete("/todos/{user}/{todo}", [TodoController::class, "destroy"])->middleware(["auth", "verified"])->name("todo.destroy");
-
 Route::middleware(["auth", "verified"])->group(function () {
     Route::get("/todos/{user}", [TodoController::class, "index"])->name("todo.index");
     Route::get("/todos/{user}/deleted/{perPage?}", [TodoController::class, "getDeleted"])->name("todo.getDeleted");
