@@ -129,4 +129,9 @@ class TodoController extends Controller
 
         return response()->json(Todo::remove($todo->id, $user), 200);
     }
+
+    public function delete(Request $request, User $user)
+    {
+        return response()->json(Todo::deleteAll($user), 200);
+    }
 }

@@ -26,6 +26,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::post("/todos/{user}", [TodoController::class, "store"])->name("todo.store");
     Route::put("/todos/{user}/{todo}", [TodoController::class, "update"])->name("todo.update");
     Route::delete("/todos/{user}/{todo}", [TodoController::class, "destroy"])->name("todo.destroy");
+    Route::patch("/todos/{user}", [TodoController::class, "delete"])->name("todo.delete");
 });
 
 Route::middleware('auth')->group(function () {

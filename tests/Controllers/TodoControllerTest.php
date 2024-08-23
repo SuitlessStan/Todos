@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 
 class TodoControllerTest extends TestCase
@@ -76,6 +77,16 @@ class TodoControllerTest extends TestCase
 
         $response->assertStatus(200);
 
+    }
+
+    public function test_authenticated_user_can_delete_all_todos()
+    {
+        $user = User::factory()->create();
+        Todo::factory(10)->create(["text" => Str::random(), "user_id" => $user->id, "inActiveAt" => Carbon::now()->toDateString()]);
+
+        $response = $this->actingAs($user)->patch(route('todo.delete', ['user' => $user]));
+
+        $response->assertStatus(200);
     }
 }
 

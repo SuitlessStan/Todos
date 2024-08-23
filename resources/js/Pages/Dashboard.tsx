@@ -5,9 +5,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     faSearch,
     faTrash,
-    faCheck,
     faClipboard,
     faXmark,
+    faBroom,
 } from "@fortawesome/free-solid-svg-icons";
 import { Todo } from "@/types";
 import Modal from "@/Components/Modal";
@@ -70,16 +70,16 @@ export default function Dashboard({ auth }: PageProps) {
         .sort((a, b) => {
             if (a.created_at && b.created_at) {
                 if (a.created_at < b.created_at) {
-                    return 1; // If a is older, move it down
+                    return 1;
                 } else if (a.created_at > b.created_at) {
-                    return -1; // If a is newer, move it up
+                    return -1;
                 }
             }
             if (a.updated_at && b.updated_at) {
                 if (a.updated_at < b.updated_at) {
-                    return 1; // If a is older, move it down
+                    return 1;
                 } else if (a.updated_at > b.updated_at) {
-                    return -1; // If a is newer, move it up
+                    return -1;
                 }
             }
             return 0;
@@ -196,6 +196,15 @@ export default function Dashboard({ auth }: PageProps) {
     };
 
     const getTodos = async () => await axios.get(`todos/${auth.user.id}`);
+
+    const clearTrash = async () => {
+        try {
+            await axios.patch(`todos/${auth.user.id}`);
+            setDeletedTodos([]);
+        } catch (err) {
+            console.error("Error clearing trash ", err);
+        }
+    };
 
     const getDeletedTodos = async () =>
         await axios.get(`todos/${auth.user.id}/deleted`);
@@ -318,7 +327,7 @@ export default function Dashboard({ auth }: PageProps) {
                             />
                             <input
                                 onClick={closeModal}
-                                type="submit"
+                                type="button"
                                 className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded cursor-pointer"
                                 value="Cancel"
                             />
@@ -348,6 +357,7 @@ export default function Dashboard({ auth }: PageProps) {
             </div>
 
             <button
+                title="deletedTodos"
                 onClick={() => setDeletedModalState(true)}
                 type="button"
                 className="fixed bottom-4 right-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50"
@@ -380,6 +390,21 @@ export default function Dashboard({ auth }: PageProps) {
                         );
                     })}
 
+                    <div className="flex justify-center items-center">
+                        <button
+                            title="clearTodos"
+                            onClick={clearTrash}
+                            type="button"
+                            className={`${
+                                !deletedTodos.length ? "hidden" : ""
+                            }`}
+                        >
+                            <FontAwesomeIcon
+                                className="p-3 m-1 rounded bg-darkseagreen cursor-pointer"
+                                icon={faBroom}
+                            />
+                        </button>
+                    </div>
                     {!deletedTodos.length && <span>No deleted todos.</span>}
                 </div>
             </Modal>

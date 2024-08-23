@@ -57,6 +57,11 @@ class Todo extends Model
         return self::where(["id" => $id, "user_id" => $user->id])->update($data);
     }
 
+    public static function deleteAll($user)
+    {
+        return self::where('user_id', $user->id)->whereNotNull('inActiveAt')->forceDelete();
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
