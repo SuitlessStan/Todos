@@ -18,11 +18,14 @@ import {
     useState,
     CSSProperties,
 } from "react";
-import { fetchDataFromLocalStorage, stringifyAndStore } from "@/Util";
+import {
+    fetchDataFromLocalStorage,
+    stringifyAndStore,
+    formatString,
+} from "@/Util";
 import useKeyPress from "@/hooks/useKeyPress";
 import axios from "axios";
 
-import { ClipLoader } from "react-spinners";
 import Pagination from "@/Components/Pagination";
 import Todos from "@/Components/Todos";
 
@@ -137,7 +140,7 @@ export default function Dashboard({ auth }: PageProps) {
         }
 
         const response = await axios.post(`/todos/${auth.user.id}`, {
-            text: todo.text,
+            text: formatString(todo.text),
             isDone: todo.isDone,
             user_id: auth.user.id,
         });
@@ -148,7 +151,7 @@ export default function Dashboard({ auth }: PageProps) {
             ...prevState,
             {
                 id: id,
-                text: todo.text,
+                text: formatString(todo.text),
                 isDone: todo.isDone,
                 user_id: auth.user.id,
             },

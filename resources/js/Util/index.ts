@@ -16,3 +16,11 @@ export const fetchDataFromLocalStorage = (key: string) => {
         return null;
     }
 };
+
+export const formatString =  (input: string) =>{
+      let trimmedString = input.trim();
+    
+      let formattedString = trimmedString.charAt(0).toUpperCase() + trimmedString.slice(1);
+      
+      return formattedString;
+}
