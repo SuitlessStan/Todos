@@ -11,13 +11,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { Todo } from "@/types";
 import Modal from "@/Components/Modal";
-import {
-    ChangeEvent,
-    FormEvent,
-    useEffect,
-    useState,
-    CSSProperties,
-} from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import {
     fetchDataFromLocalStorage,
     stringifyAndStore,
@@ -28,13 +22,6 @@ import axios from "axios";
 
 import Pagination from "@/Components/Pagination";
 import Todos from "@/Components/Todos";
-
-const override: CSSProperties = {
-    display: "block",
-    margin: "0 auto",
-    borderColor: "#7fbc95",
-    borderWidth: "5px",
-};
 
 export default function Dashboard({ auth }: PageProps) {
     const [modalState, setModalState] = useState(false);
@@ -52,12 +39,7 @@ export default function Dashboard({ auth }: PageProps) {
     const handleSearchQuery = (e: ChangeEvent<HTMLInputElement>) =>
         setSearchQuery(event?.target?.value);
 
-    const filteredTodos = todos.filter((todo) =>
-        todo.text.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
     let [loading, setLoading] = useState(true);
-    let [color, setColor] = useState("#ed7461");
 
     const [currentPage, setCurrentPage] = useState(1);
     const [todosPerPage] = useState(10);
@@ -198,7 +180,7 @@ export default function Dashboard({ auth }: PageProps) {
         setTodos(updatedTodos);
     };
 
-    const getTodos = async () => await axios.get(`todos/${auth.user.id}`);
+    const getTodos = async () => axios.get(`todos/${auth.user.id}`);
 
     const clearTrash = async () => {
         try {
@@ -222,7 +204,7 @@ export default function Dashboard({ auth }: PageProps) {
         setLoading(true);
         getTodos()
             .then((res) => {
-                setTodos(res.data);
+                setTodos(res.data.todos);
                 setLoading(false);
             })
             .catch((err) => {

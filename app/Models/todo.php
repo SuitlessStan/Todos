@@ -31,7 +31,10 @@ class Todo extends Model
 
     public static function getDeleted(User $user, $perPage = 10)
     {
-        return self::where("user_id", $user->id)->onlyTrashed()->paginate($perPage)->all();
+        return self::where("user_id", $user->id)
+            ->onlyTrashed()
+            ->paginate($perPage)
+            ->all();
     }
 
 
@@ -49,17 +52,21 @@ class Todo extends Model
 
     public static function remove($id, $user)
     {
-        return self::where(["id" => $id, "user_id" => $user->id])->update(["inActiveAt" => Carbon::now()->toDateTimeString()]);
+        return self::where(["id" => $id, "user_id" => $user->id])
+            ->update(["inActiveAt" => Carbon::now()->toDateTimeString()]);
     }
 
     public static function edit($id, $user, $data)
     {
-        return self::where(["id" => $id, "user_id" => $user->id])->update($data);
+        return self::where(["id" => $id, "user_id" => $user->id])
+            ->update($data);
     }
 
     public static function deleteAll($user)
     {
-        return self::where('user_id', $user->id)->whereNotNull('inActiveAt')->forceDelete();
+        return self::where('user_id', $user->id)
+            ->whereNotNull('inActiveAt')
+            ->forceDelete();
     }
 
     public function user()

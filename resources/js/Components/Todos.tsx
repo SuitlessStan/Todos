@@ -45,6 +45,25 @@ const Todos = ({
                         {todo.text}
                     </span>
                     <div className="flex justify-center items-center gap-2">
+                        <span className="hidden md:inline-block">
+                            {" "}
+                            {new Date(todo.created_at as Date)
+                                .toLocaleDateString("en-GB", {
+                                    day: "numeric",
+                                    month: "long",
+                                    year: "numeric",
+                                })
+                                .replace(",", "")}
+                        </span>
+                        <span className="hidden lg:inline-block">
+                            {", "}
+                            {new Date(
+                                todo.created_at as Date
+                            ).toLocaleTimeString("en-GB", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                            })}
+                        </span>
                         <button
                             type="button"
                             onClick={() => markAsDeleted(todo.id as number)}

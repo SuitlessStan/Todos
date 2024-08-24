@@ -12,9 +12,9 @@ class TodoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(User $user, $perPage = 30)
+    public function index(Request $request, User $user, $perPage = 30)
     {
-        return response()->json(Todo::getAll($user, $perPage), 200);
+        return response()->json(['todos' => Todo::getAll($user, $perPage), 'token' => $request->session()->token()], 200);
     }
 
     /**
